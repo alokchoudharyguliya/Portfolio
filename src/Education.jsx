@@ -1,10 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaBars } from 'react-icons/fa';
+import { FaBars, FaDownload, FaPlus, FaUpload } from 'react-icons/fa';
 import './Education.css';
 
 const EducationCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [editCertificateIndex, setEditCertificateIndex] = useState(null);
+  const [certificates, setCertificates] = useState([
+    {
+      id: 1,
+      title: "AWS Certified Cloud Practitioner",
+      description: "Cloud computing fundamentals and AWS services",
+      image: "https://storage.googleapis.com/portfolio-pseudophoenix/certificate1.jpg",
+      issuer: "Amazon Web Services",
+      date: "2023-06"
+    },
+    {
+      id: 2,
+      title: "Google Cloud Associate",
+      description: "Google Cloud Platform certification",
+      image: "https://storage.googleapis.com/portfolio-pseudophoenix/certificate2.jpg",
+      issuer: "Google Cloud",
+      date: "2023-08"
+    },
+    {
+      id: 3,
+      title: "Linux System Administrator",
+      description: "Linux system administration and management",
+      image: "https://storage.googleapis.com/portfolio-pseudophoenix/certificate3.jpg",
+      issuer: "Linux Foundation",
+      date: "2023-10"
+    }
+  ]);
+  const [hoveredCertId, setHoveredCertId] = useState(null);
+  const [docPreview, setDocPreview] = useState(null);
+  const [showDocPreview, setShowDocPreview] = useState(false);
+  const fileInputRef = useRef();
   const isActive = location.pathname === '/education';
   const educationData = [
     {
@@ -62,6 +93,31 @@ const EducationCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
     setCurrentSlide(index);
   };
 
+  const handleDocumentUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setDocPreview({
+          name: file.name,
+          data: ev.target.result,
+          type: file.type
+        });
+        setShowDocPreview(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const downloadDocument = () => {
+    if (docPreview) {
+      const link = document.createElement('a');
+      link.href = docPreview.data;
+      link.download = docPreview.name;
+      link.click();
+    }
+  };
+
   return (
 
     <div className={`card ${isActive ? 'card-visible' : ''}`}>
@@ -80,7 +136,7 @@ const EducationCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
               className={`education-item ${index % 2 === 0 ? 'lefta-text' : 'lefta-image'}`}
               data-aos={index % 2 === 0 ? "fade-aright" : "fade-aleft"}
             >
-              { edu.images ? (
+              {edu.images ? (
                 <>
                   <div className="education-text">
                     <h3>{edu.title}</h3>
@@ -187,8 +243,200 @@ const EducationCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
             </div>
           ))}
         </div>
+
+        {/* Document Preview Modal */}
+        {showDocPreview && docPreview && (
+          <div className="doc-modal-overlay" onClick={() => setShowDocPreview(false)}>
+            <div className="doc-modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>{docPreview.name}</h3>
+              <div className="doc-preview-container">
+                {docPreview.type.startsWith('image/') ? (
+                  <img src={docPreview.data} alt="Document Preview" style={{ maxWidth: '100%', maxHeight: '600px' }} />
+                ) : (
+                  <object data={docPreview.data} type={docPreview.type} style={{ width: '100%', height: '600px' }}>
+                    <p>Document Preview Not Available</p>
+                  </object>
+                )}
+              </div>
+              <div className="doc-modal-actions">
+                <button onClick={downloadDocument} className="download-btn">
+                  <FaDownload /> Download
+                </button>
+                <button onClick={() => setShowDocPreview(false)} className="close-btn">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Document Upload Section */}
+        <div className="document-section">
+          <h2>Documents & Certificates</h2>
+          <button 
+            className="doc-upload-btn"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <FaUpload /> Upload Document
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleDocumentUpload}
+            style={{ display: 'none' }}
+            accept=".pdf,.doc,.docx,.jpg,.png,.jpeg"
+          />
+          {docPreview && (
+            <div className="doc-uploaded">
+              <p>Uploaded: {docPreview.name}</p>
+              <button onClick={() => setShowDocPreview(true)} className="preview-doc-btn">
+                Preview
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Achievements Section */}
+        <div className="achievements-section">
+          <h2>Achievements & Certifications</h2>
+          
+          <div className="certificates-gallery">
+            {certificates.map((cert) => (
+              <div
+                key={cert.id}
+                className="certificate-card"
+                onMouseEnter={() => setHoveredCertId(cert.id)}
+                onMouseLeave={() => setHoveredCertId(null)}
+              >
+                {editCertificateIndex === cert.id ? (
+                  <CertificateEditForm
+                    cert={cert}
+                    onSave={(updated) => {
+                      setCertificates(certificates.map(c => c.id === cert.id ? updated : c));
+                      setEditCertificateIndex(null);
+                    }}
+                    onCancel={() => setEditCertificateIndex(null)}
+                    onDelete={() => {
+                      setCertificates(certificates.filter(c => c.id !== cert.id));
+                      setEditCertificateIndex(null);
+                    }}
+                  />
+                ) : (
+                  <>
+                    <div className="certificate-image-wrapper">
+                      <img src={cert.image} alt={cert.title} className="certificate-image" />
+                      <div className={`certificate-overlay ${hoveredCertId === cert.id ? 'visible' : ''}`}>
+                        <h4>{cert.title}</h4>
+                        <p>{cert.description}</p>
+                      </div>
+                    </div>
+                    <button
+                      className="cert-edit-btn"
+                      onClick={() => setEditCertificateIndex(cert.id)}
+                    >
+                      Edit
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+
+            {/* Add New Certificate */}
+            <div className="certificate-card add-certificate">
+              <button
+                className="add-cert-btn"
+                onClick={() => {
+                  const newCert = {
+                    id: Math.max(...certificates.map(c => c.id), 0) + 1,
+                    title: '',
+                    description: '',
+                    image: '',
+                    issuer: '',
+                    date: ''
+                  };
+                  setCertificates([...certificates, newCert]);
+                  setEditCertificateIndex(newCert.id);
+                }}
+              >
+                <FaPlus size={32} />
+                <span>Add Certificate</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  );
+};
+
+/* Certificate Edit Form Component */
+const CertificateEditForm = ({ cert, onSave, onCancel, onDelete }) => {
+  const [form, setForm] = useState({ ...cert });
+  const fileInputRef = useRef();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setForm((prev) => ({ ...prev, image: ev.target.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <form className="certificate-edit-form" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
+      <div className="cert-edit-image">
+        {form.image && <img src={form.image} alt="Preview" style={{ width: '80px', height: '80px', borderRadius: '6px', marginBottom: '8px' }} />}
+        <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
+        <button type="button" onClick={() => fileInputRef.current.click()} className="upload-btn">
+          Upload Image
+        </button>
+      </div>
+      <input
+        type="text"
+        name="title"
+        value={form.title}
+        onChange={handleChange}
+        placeholder="Certificate Title"
+        className="cert-input"
+        required
+      />
+      <textarea
+        name="description"
+        value={form.description}
+        onChange={handleChange}
+        placeholder="Description"
+        className="cert-input"
+        rows={2}
+      />
+      <input
+        type="text"
+        name="issuer"
+        value={form.issuer}
+        onChange={handleChange}
+        placeholder="Issuer"
+        className="cert-input"
+      />
+      <input
+        type="date"
+        name="date"
+        value={form.date}
+        onChange={handleChange}
+        className="cert-input"
+      />
+      <div className="cert-form-actions">
+        <button type="submit" className="save-btn">Save</button>
+        <button type="button" className="cancel-btn" onClick={onCancel}>Cancel</button>
+        <button type="button" className="delete-btn" onClick={onDelete}>Delete</button>
+      </div>
+    </form>
   );
 };
 

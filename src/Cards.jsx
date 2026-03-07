@@ -4,6 +4,10 @@ import SkillsCard from './Skills';
 import { FaBars } from 'react-icons/fa6';
 import BlogCard from './Blog';
 import EducationCard from './Education';
+import ExperienceCard from './Experience';
+import OtherCard from './Other';
+import MyZoneCard from './MyZone';
+import GameZoneCard from './GameZone';
 import ContactCard from './Contact';
 import { NavLink } from 'react-router-dom';
 import ProjectCard from './Projects';
@@ -67,4 +71,4 @@ const HomeCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   );
 };
 
-export { HomeCard, SkillsCard, EducationCard, ProjectCard, BlogCard, ContactCard };
+export { HomeCard, SkillsCard, EducationCard, ExperienceCard, OtherCard, MyZoneCard, GameZoneCard, ProjectCard, BlogCard, ContactCard };

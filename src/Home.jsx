@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CardMenu from './CardMenu';
-import { HomeCard, SkillsCard, EducationCard, ProjectCard, BlogCard, ContactCard } from './Cards';
+import { HomeCard, SkillsCard, EducationCard, ExperienceCard, OtherCard, MyZoneCard, GameZoneCard, ProjectCard, BlogCard, ContactCard } from './Cards';
 import { useState } from 'react';
 
 function App() {
@@ -38,6 +38,10 @@ function App() {
           <Route path="/home" element={<HomeCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
           <Route path="/skills" element={<SkillsCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
           <Route path="/education" element={<EducationCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
+          <Route path="/experience" element={<ExperienceCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
+          <Route path="/other" element={<OtherCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
+          <Route path="/myzone" element={<MyZoneCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
+          <Route path="/gamezone" element={<GameZoneCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
           <Route path="/blog" element={<BlogCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
           <Route path="/project" element={<ProjectCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />
           <Route path="/contact" element={<ContactCard isNavBarClosed={isNavBarClosed} setIsNavBarClosed={setIsNavBarClosed} />} />

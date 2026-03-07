@@ -5,7 +5,7 @@
   top: 0;
   height: 100%;
   display: flex;
-  width: 368px;
+  width: 408px;
   align-items: center;
   background-color: hwb(0 20% 80%);
   z-index: 100;
@@ -14,6 +14,7 @@
   justify-content: space-evenly;
   transition: linear 0.5s ease-in-out;
   flex-direction: column-reverse;
+  box-sizing: border-box;
 }
 
 .menu-container-visible {
@@ -30,25 +31,37 @@
 
 .menu {
   position: relative;
-  /* overflow: scroll !important; */
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+  height: 400px;                      /* Increased for symmetric ±4 item visibility */
+  perspective: 700px;
+  perspective-origin: left center;
+  transform-style: preserve-3d;
+  overflow: hidden;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
+  width: 300px;
+  /* fade zones: 10%-90% keeps symmetry with more breathing room */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image:         linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
 }
 
 .menu li {
-  position: relative;
+  position: absolute;
+  top: 80px;
+  left: 0;
+  width: fit-content;
   list-style: none;
 }
 
 .menu li a {
   position: relative;
-  font-size: 2em;
+  display: block;
+  text-align: left;
+  padding-left: 18px;
+  font-size: 1.8em;
   text-decoration: none;
-  line-height: 1em;
-  letter-spacing: 2px;
+  margin-right: 0;
+  line-height: 1.2em;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: transparent;
   -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
@@ -94,7 +107,7 @@
 
   .menu-container-hidden {
     /* left: -100%; */
-  left: calc(-100% - 40px);
+    left: calc(-100% - 40px);
   }
 
   .menu-container-visible {
@@ -165,9 +178,9 @@
 
 /* Skills container */
 .skills-container {
-  color:black;
+  color: black;
   display: grid;
-  align-items:center;
+  align-items: center;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   padding: 20px;

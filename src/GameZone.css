@@ -1,0 +1,265 @@
+.gamezone-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 30px;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.game-card {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.08));
+  border: 2px solid #ff6b35;
+  border-radius: 12px;
+  padding: 25px 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  min-height: 280px;
+}
+
+.game-card:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.25), rgba(255, 107, 53, 0.15));
+  border-color: #ff6b35;
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(255, 107, 53, 0.3);
+}
+
+.game-icon {
+  font-size: 3.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  width: 80px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 107, 53, 0.1));
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.game-card:hover .game-icon {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), rgba(255, 107, 53, 0.2));
+  transform: scale(1.1) rotate(10deg);
+}
+
+.game-card h3 {
+  margin: 0;
+  font-size: 1.3em;
+  color: #333333;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.game-desc {
+  margin: 0;
+  font-size: 0.9em;
+  color: #666666;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.play-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff6b35, rgba(255, 107, 53, 0.8));
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95em;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+  letter-spacing: 0.5px;
+}
+
+.play-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(255, 107, 53, 0.7));
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.35);
+}
+
+.play-btn:active {
+  transform: scale(0.98);
+}
+
+/* Card styling from main CSS
+.card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+} */
+
+.card.card-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-header {
+  padding: 20px 25px;
+  border-bottom: 3px solid rgba(255, 107, 53, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 2em;
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 1px;
+}
+
+.cross-button-open,
+.cross-button-closed {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 1.2em;
+}
+
+.cross-button-open:hover,
+.cross-button-closed:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, rgba(250, 240, 230, 0.5), rgba(245, 235, 225, 0.3));
+}
+
+/* Scrollbar Styling */
+.gamezone-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.gamezone-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gamezone-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.4), rgba(255, 107, 53, 0.2));
+  border-radius: 10px;
+}
+
+.gamezone-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.6), rgba(255, 107, 53, 0.4));
+}
+
+/* ── Game open state (hides scroll, fills height for canvas) ─────────────── */
+.gamezone-container.game-open {
+  overflow: hidden;
+  padding: 20px;
+}
+
+/* ── Active game layout ───────────────────────────────────────────────────── */
+.game-active-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 10px;
+}
+
+.back-to-games {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  background: rgba(255, 107, 53, 0.12);
+  border: 1px solid rgba(255, 107, 53, 0.55);
+  color: #ff6b35;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88em;
+  font-weight: 700;
+  width: fit-content;
+  transition: background 0.18s;
+}
+.back-to-games:hover { background: rgba(255, 107, 53, 0.28); }
+
+/* flex: 1 + min-height: 0 lets the viewport shrink to fit the back button */
+.game-viewport {
+  flex: 1;
+  min-height: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── Coming-soon game cards ───────────────────────────────────────────────── */
+.game-card.coming-soon {
+  opacity: 0.55;
+  cursor: default;
+}
+.game-card.coming-soon:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.coming-soon-badge {
+  padding: 8px 20px;
+  background: rgba(255, 107, 53, 0.12);
+  border: 1px dashed rgba(255, 107, 53, 0.5);
+  border-radius: 8px;
+  color: #ff6b35;
+  font-size: 0.82em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .games-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .game-card {
+    min-height: 240px;
+    padding: 15px;
+  }
+
+  .game-icon {
+    font-size: 2.5em;
+    height: 60px;
+    width: 60px;
+  }
+
+  .game-card h3 {
+    font-size: 1em;
+  }
+
+  .game-desc {
+    font-size: 0.8em;
+  }
+}

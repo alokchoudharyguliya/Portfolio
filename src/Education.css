@@ -716,3 +716,484 @@
     height: 200px;
   }
 }
+
+/* ── Achievements Section ──────────────────────────────── */
+.achievements-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 2px solid #f0f0f0;
+}
+
+.achievements-section h2 {
+  font-size: 1.8rem;
+  color: #222;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.achievements-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background-color: #ffdd1c;
+}
+
+/* ── Certificates Gallery ──────────────────────────────── */
+.certificates-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  padding: 1rem;
+}
+
+/* ── Certificate Card ──────────────────────────────────── */
+.certificate-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.certificate-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.certificate-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.certificate-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+.certificate-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: #fff;
+  text-align: center;
+}
+
+.certificate-overlay.visible {
+  opacity: 1;
+}
+
+.certificate-overlay h4 {
+  font-size: 1em;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.certificate-overlay p {
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cert-edit-btn {
+  padding: 10px;
+  border: none;
+  background: #ffdd1c;
+  color: #222;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-grow: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cert-edit-btn:hover {
+  background: #ffd700;
+}
+
+/* ── Add Certificate Button ─────────────────────────────── */
+.add-certificate {
+  border: 2px dashed #ffdd1c;
+  background: #fffef5;
+}
+
+.add-cert-btn {
+  width: 100%;
+  height: 100%;
+  min-height: 244px;
+  border: none;
+  background: transparent;
+  color: #ffdd1c;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.add-cert-btn:hover {
+  color: #ffd700;
+  transform: scale(1.05);
+}
+
+/* ── Certificate Edit Form ──────────────────────────────– */
+.certificate-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: #fffef5;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 244px;
+}
+
+.cert-edit-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cert-input {
+  padding: 8px 10px;
+  border: 1px solid #ffdd1c;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-family: inherit;
+  background: #fff;
+}
+
+.cert-input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 0 2px rgba(255, 221, 28, 0.1);
+}
+
+.cert-input textarea {
+  resize: vertical;
+}
+
+.upload-btn {
+  padding: 6px 12px;
+  background: #ffdd1c;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: background 0.2s;
+}
+
+.upload-btn:hover {
+  background: #ffd700;
+}
+
+.cert-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cert-form-actions button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: background 0.2s;
+}
+
+.save-btn {
+  background: #ffdd1c;
+  color: #222;
+}
+
+.save-btn:hover {
+  background: #ffd700;
+}
+
+.cancel-btn {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #cccccc;
+}
+
+.delete-btn {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #ff4444;
+}
+
+/* ── Document Section ───────────────────────────────────– */
+.document-section {
+  margin-top: 4rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fffef5 0%, #fffbf0 100%);
+  border-radius: 12px;
+  border: 2px solid #ffdd1c;
+}
+
+.document-section h2 {
+  font-size: 1.6rem;
+  color: #222;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.document-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background-color: #ffdd1c;
+}
+
+.doc-upload-btn {
+  padding: 12px 24px;
+  background: #ffdd1c;
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 221, 28, 0.3);
+}
+
+.doc-upload-btn:hover {
+  background: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 221, 28, 0.4);
+}
+
+.doc-uploaded {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  border-left: 4px solid #ffdd1c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.doc-uploaded p {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.preview-doc-btn {
+  padding: 8px 16px;
+  background: #ffdd1c;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.preview-doc-btn:hover {
+  background: #ffd700;
+}
+
+/* ── Document Modal ──────────────────────────────────────– */
+.doc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.doc-modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 800px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.doc-modal-content h3 {
+  font-size: 1.3rem;
+  color: #222;
+  margin-bottom: 1rem;
+  word-break: break-all;
+}
+
+.doc-preview-container {
+  margin: 1.5rem 0;
+  text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 1.5rem;
+  justify-content: center;
+}
+
+.download-btn {
+  padding: 12px 24px;
+  background: #ffdd1c;
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.download-btn:hover {
+  background: #ffd700;
+}
+
+.close-btn {
+  padding: 12px 24px;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: #cccccc;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────– */
+@media (max-width: 768px) {
+  .certificates-gallery {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .achievement-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .document-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+  }
+  
+  .doc-modal-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .certificates-gallery {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .certificate-image-wrapper {
+    height: 150px;
+  }
+  
+  .doc-modal-overlay {
+    padding: 10px;
+  }
+  
+  .doc-modal-content {
+    max-height: 90vh;
+    padding: 1rem;
+  }
+  
+  .doc-modal-actions {
+    flex-direction: column;
+  }
+  
+  .download-btn,
+  .close-btn {
+    width: 100%;
+  }
+}

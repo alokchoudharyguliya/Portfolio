@@ -1,0 +1,238 @@
+/* ── Skill wrapper ─────────────────────────────────── */
+.skill-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ffe0e0;
+  box-shadow: 0 2px 10px 0 rgba(255, 68, 67, 0.08);
+  padding: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.skill-wrapper:hover,
+.skill-hovered {
+  box-shadow: 0 6px 24px 0 rgba(255, 68, 67, 0.15);
+  transform: translateY(-3px);
+}
+
+/* ── Skill card (unified view + edit) ─────────────── */
+.skill-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+}
+
+/* ── Image + Name row ─────────────────────────────── */
+.skill-header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+/* ── Image container — fixed compact size ─────────── */
+.skill-image-container {
+  position: relative;
+  width: 80px !important;
+  height: 80px !important;
+  margin: 0 !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  border: 2px solid #ffe0e0 !important;
+  flex-shrink: 0;
+}
+
+.skill-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Skill name — sits to the right of image */
+.skill-name {
+  font-size: 1.25em !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  margin-bottom: 0 !important;
+  color: #222 !important;
+  flex: 1;
+  align-self: flex-start;
+}
+
+/* Skill description — compact */
+.skill-description {
+  font-size: 0.78em !important;
+  text-align: center !important;
+  margin-bottom: 8px !important;
+  color: #555 !important;
+  line-height: 1.35 !important;
+}
+
+/* Skill meta row */
+.skill-meta {
+  font-size: 0.78em !important;
+  margin-bottom: 8px !important;
+}
+
+/* Stars row */
+.skill-stars {
+  gap: 3px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Proficiency bar */
+.proficiency-bar {
+  height: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Certificate link */
+.certificate-link {
+  font-size: 0.75em !important;
+  padding: 3px !important;
+}
+
+/* Blurred overlay with upload button in edit mode */
+.skill-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.skill-image-overlay:hover {
+  background: rgba(0, 0, 0, 0.62);
+}
+
+/* ── Inline editable fields ───────────────────────── */
+.skill-inline-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px dashed #ffb3b3;
+  border-radius: 0;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: inherit;
+  padding: 2px 4px;
+  resize: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.skill-inline-input:focus {
+  border-bottom-color: #ff4443;
+  background: rgba(255, 68, 67, 0.04);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Name input — matches h3, left-aligned next to image */
+input.skill-name.skill-inline-input {
+  font-size: 1.25em;
+  font-weight: 700;
+  margin-bottom: 0;
+  text-align: left;
+  align-self: flex-start;
+}
+
+/* Description textarea — matches p */
+textarea.skill-description.skill-inline-input {
+  font-size: 0.78em;
+  line-height: 1.35;
+  min-height: 38px;
+  text-align: center;
+}
+
+/* Meta number inputs */
+.skill-meta-input {
+  text-align: center;
+  font-size: 0.88em;
+  font-weight: 600;
+  width: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Certificate URL input */
+.skill-cert-input {
+  font-size: 0.8em;
+  margin-top: 4px;
+  color: #ff4443;
+}
+
+/* ── Edit action buttons ──────────────────────────── */
+.skill-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.edit-skill-btn,
+.save-btn,
+.cancel-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: #ff4443;
+  color: #fff;
+  transition: background 0.2s;
+  font-size: 0.88em;
+}
+.edit-skill-btn:hover,
+.save-btn:hover {
+  background: #d32f2f;
+}
+.cancel-btn {
+  background: #eee;
+  color: #333;
+}
+.cancel-btn:hover {
+  background: #ccc;
+}
+
+/* ── Stars ────────────────────────────────────────── */
+.star-filled {
+  color: #ffb300;
+}
+.star-empty {
+  color: #ddd;
+}
+
+/* ── Skills container & grid ──────────────────────── */
+.skills-container {
+  width: 100%;
+}
+
+.skills-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 32px 28px !important;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px;
+}
+
+@media (max-width: 1100px) {
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .skills-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
