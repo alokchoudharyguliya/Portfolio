@@ -1,91 +1,70 @@
 import './Skills.css';
 import { useState, useEffect, useRef } from 'react';
-import { FaStar, FaBars, FaExternalLinkAlt, FaUpload } from 'react-icons/fa';
+import { FaStar, FaBars, FaExternalLinkAlt, FaUpload, FaTrash, FaPlus, FaCamera } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import useSkills from './hooks/useSkills';
+import { usePermissions } from './contexts/PermissionsProvider';
 
 const truncate = (str, maxLen) => {
   if (!str || str.length <= maxLen) return str;
   return str.slice(0, maxLen - 3) + '...';
 };
+
 const SkillsCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   const location = useLocation();
   const isActive = location.pathname === '/skills';
-  
-  // Sample skills data - replace with your actual skills
-  const skills = [
-    {
-      id: 1,
-      name: 'Backend',
-      image: 'https://th.bing.com/th/id/R.f81a6f373c244b1f70f4b7402b5ab372?rik=rbXh4ieLuKt%2bmA&riu=http%3a%2f%2flogos-download.com%2fwp-content%2fuploads%2f2016%2f09%2fReact_logo_logotype_emblem.png&ehk=QhGOkKcUKCU7FBQgHOajOiJqJBACUTD2Ni6LsfqzCEA%3d&risl=&pid=ImgRaw&r=0',
-      certificateLink: 'https://example.com/certificate1',
-      proficiency: 4, // out of 5
-      description: 'Building interactive UIs with React hooks and context API',
-      yearsExperience: 2,
-      projectsUsed: 10
-    },
-    {
-      id: 2,
-      name: 'Frontend',
-      image: 'https://media.geeksforgeeks.org/wp-content/uploads/20190906180444/How-to-Become-a-JavaScript-Developer.png',
-      certificateLink: 'https://example.com/certificate2',
-      proficiency: 4,
-      description: 'Modern ES6+ JavaScript with functional programming',
-      yearsExperience: 4,
-      projectsUsed: 25
-    },
-    {
-      id: 3,
-      name: 'ML/DL',
-      image: 'https://storage.googleapis.com/portfolio-pseudophoenix/10310009.png',
-      certificateLink: 'https://example.com/certificate2',
-      proficiency: 3,
-      description: 'Modern ES6+ JavaScript with functional programming',
-      yearsExperience: 4,
-      projectsUsed: 25
-    },
-    {
-      id: 4,
-      name: '',
-      image: 'https://contentstatic.techgig.com/photo/82905582/5-must-have-python-developer-skills-to-be-successful.jpg?91397',
-      certificateLink: 'https://example.com/certificate2',
-      proficiency: 4.5,
-      description: 'Modern ES6+ JavaScript with functional programming',
-      yearsExperience: 4,
-      projectsUsed: 25
-    },
-    {
-      id: 5,
-      name: 'DevOps',
-      image: 'https://storage.googleapis.com/portfolio-pseudophoenix/2648921.jpg',
-      certificateLink: 'https://example.com/certificate2',
-      proficiency: 4.25,
-      description: 'Modern ES6+ JavaScript with functional programming',
-      yearsExperience: 2,
-      projectsUsed: 25
-    }
-    // Add more skills as needed
-  ];
+
+  // Fetch skills from backend
+  const { skills, loading, error, createSkill, updateSkill, deleteSkill, uploadImage, removeImage } = useSkills();
+  const { isSuperuser } = usePermissions();
 
   const [hoveredSkill, setHoveredSkill] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
-  const [skillsState, setSkillsState] = useState(skills);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   return (
     <div className={`card ${isActive ? 'card-visible' : ''}`}>
       <div className='card-header' style={{ background: '#ff4443', '--clr': '#ff4443' }}>
         <h2>Skills</h2>
-        <NavLink
-          to="/"
-          className={isNavBarClosed ? 'cross-button-closed' : 'cross-button-open'}
-          onClick={() => setIsNavBarClosed(!isNavBarClosed)}
-        >
-          <FaBars />
-        </NavLink>
+        <div className="header-actions">
+          {isSuperuser && (
+            <button
+              className="add-skill-btn"
+              onClick={() => setShowAddForm(!showAddForm)}
+              title="Add new skill"
+            >
+              <FaPlus size={18} />
+            </button>
+          )}
+          <NavLink
+            to="/"
+            className={isNavBarClosed ? 'cross-button-closed' : 'cross-button-open'}
+            onClick={() => setIsNavBarClosed(!isNavBarClosed)}
+          >
+            <FaBars />
+          </NavLink>
+        </div>
       </div>
 
-      <div className='card-body skills-container skills-grid'>
-        {skillsState.map((skill) => (
+      {showAddForm && isSuperuser && (
+        <AddSkillForm
+          onSave={async ({ imageFile, ...newSkill }) => {
+            const created = await createSkill(newSkill);
+            if (imageFile) {
+              await uploadImage(created.id, imageFile);
+            }
+            setShowAddForm(false);
+          }}
+          onCancel={() => setShowAddForm(false)}
+        />
+      )}
+
+      {loading && <p className="loading-text">Loading skills...</p>}
+      {error && <p className="error-text">Error loading skills: {error.message}</p>}
+
+          <div className='card-body skills-container skills-grid'>
+        {skills.map((skill) => (
           <div
             key={skill.id}
             className={`skill-wrapper ${hoveredSkill === skill.id ? 'skill-hovered' : ''}`}
@@ -95,12 +74,19 @@ const SkillsCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
             <SkillCard
               skill={skill}
               isEditing={editIndex === skill.id}
-              onSave={(updatedSkill) => {
-                setSkillsState(skillsState.map((s) => s.id === skill.id ? { ...updatedSkill, id: skill.id } : s));
+              onSave={async (updatedSkill) => {
+                await updateSkill(skill.id, updatedSkill);
                 setEditIndex(null);
               }}
               onCancel={() => setEditIndex(null)}
               onEditClick={() => setEditIndex(skill.id)}
+              onDelete={async () => {
+                if (window.confirm('Are you sure you want to delete this skill?')) {
+                  await deleteSkill(skill.id);
+                }
+              }}
+              onUploadImage={(file) => uploadImage(skill.id, file)}
+              onRemoveImage={() => removeImage(skill.id)}
             />
           </div>
         ))}
@@ -110,10 +96,15 @@ const SkillsCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
 };
 
 // Unified SkillCard - handles both view and edit mode in-place
-const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick }) => {
+const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick, onDelete, onUploadImage, onRemoveImage }) => {
   const [form, setForm] = useState({ ...skill });
   const [isVisible, setIsVisible] = useState(false);
-  const fileInputRef = useRef();
+  const [showCameraPopover, setShowCameraPopover] = useState(false);
+  const [popoverFile, setPopoverFile] = useState(null);
+  const [popoverPreview, setPopoverPreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const cameraInputRef = useRef();
+  const { isSuperuser } = usePermissions();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -122,20 +113,60 @@ const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick }) => {
 
   useEffect(() => {
     setForm({ ...skill });
+    setShowCameraPopover(false);
+    setPopoverFile(null);
+    setPopoverPreview(null);
   }, [skill]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Image is managed via the camera popover — never included in the edit payload
+    await onSave({ ...form });
+  };
 
-  const handleImageChange = (e) => {
+  const handleCameraFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setForm((prev) => ({ ...prev, image: ev.target.result }));
-      reader.readAsDataURL(file);
+    if (!file) return;
+    setPopoverFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPopoverPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handlePopoverUpload = async () => {
+    if (!popoverFile) return;
+    setUploadingImage(true);
+    try {
+      await onUploadImage(popoverFile);
+      setPopoverFile(null);
+      setPopoverPreview(null);
+      setShowCameraPopover(false);
+    } finally {
+      setUploadingImage(false);
     }
+  };
+
+  const handlePopoverRemove = async () => {
+    if (!window.confirm('Remove image from this skill?')) return;
+    setUploadingImage(true);
+    try {
+      await onRemoveImage();
+      setPopoverFile(null);
+      setPopoverPreview(null);
+      setShowCameraPopover(false);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const closeCameraPopover = () => {
+    setShowCameraPopover(false);
+    setPopoverFile(null);
+    setPopoverPreview(null);
   };
 
   const proficiency = isEditing ? form.proficiency : skill.proficiency;
@@ -143,16 +174,84 @@ const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick }) => {
   return (
     <form
       className={`skill-card ${isVisible ? 'visible' : ''}`}
-      onSubmit={(e) => { e.preventDefault(); onSave(form); }}
+      onSubmit={handleSubmit}
     >
+      {/* Hidden file input for camera popover — outside overflow:hidden */}
+      <input
+        type="file"
+        accept="image/*"
+        ref={cameraInputRef}
+        onChange={handleCameraFileChange}
+        style={{ display: 'none' }}
+      />
+
       {/* Image + Name side by side */}
       <div className="skill-header-row">
-        <div className="skill-image-container">
-          <img src={isEditing ? form.image : skill.image} alt={skill.name} className="skill-image" />
-          {isEditing && (
-            <div className="skill-image-overlay" onClick={() => fileInputRef.current.click()}>
-              <FaUpload size={20} style={{ color: '#fff' }} />
-              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
+        {/* Image wrapper — camera button and popover live here, outside overflow:hidden */}
+        <div className="skill-image-wrapper">
+          <div className="skill-image-container">
+            {skill.image
+              ? <img src={skill.image} alt={skill.name} className="skill-image" />
+              : <div className="skill-image-placeholder-edit">No Image</div>
+            }
+          </div>
+
+          {/* Camera icon button pinned to bottom-right corner */}
+          {isSuperuser && (
+            <button
+              type="button"
+              className={`skill-camera-btn ${showCameraPopover ? 'active' : ''}`}
+              onClick={() => setShowCameraPopover(v => !v)}
+              title="Manage image"
+            >
+              <FaCamera size={11} />
+            </button>
+          )}
+
+          {/* Inline camera popover */}
+          {showCameraPopover && (
+            <div className="skill-camera-popover">
+              <div className="camera-popover-preview">
+                {popoverPreview
+                  ? <img src={popoverPreview} alt="New preview" />
+                  : skill.image
+                    ? <img src={skill.image} alt="Current" />
+                    : <div className="camera-no-image">No image</div>
+                }
+              </div>
+              <div className="camera-popover-actions">
+                <button
+                  type="button"
+                  className="camera-choose-btn"
+                  onClick={() => cameraInputRef.current.click()}
+                  disabled={uploadingImage}
+                >
+                  Choose
+                </button>
+                {popoverFile && (
+                  <button
+                    type="button"
+                    className="camera-upload-btn"
+                    onClick={handlePopoverUpload}
+                    disabled={uploadingImage}
+                  >
+                    {uploadingImage ? '…' : 'Upload'}
+                  </button>
+                )}
+                {skill.image && (
+                  <button
+                    type="button"
+                    className="camera-remove-btn"
+                    onClick={handlePopoverRemove}
+                    disabled={uploadingImage}
+                  >
+                    Remove
+                  </button>
+                )}
+                <button type="button" className="camera-close-btn" onClick={closeCameraPopover}>
+                  ✕
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -196,6 +295,7 @@ const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick }) => {
               value={form.yearsExperience}
               onChange={handleChange}
               min={0}
+              step={0.5}
               className="skill-meta-item skill-inline-input skill-meta-input"
               placeholder="Yrs"
             />
@@ -252,11 +352,15 @@ const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick }) => {
           placeholder="Certificate URL"
           className="skill-inline-input skill-cert-input"
         />
-      ) : skill.certificateLink ? (
-        <a href={skill.certificateLink} target="_blank" rel="noopener noreferrer" className="certificate-link">
-          View Certificate <FaExternalLinkAlt />
-        </a>
-      ) : null}
+      ) : (
+        skill.certificateLink ? (
+          <a href={skill.certificateLink} target="_blank" rel="noopener noreferrer" className="certificate-link">
+            View Certificate <FaExternalLinkAlt />
+          </a>
+        ) : (
+          <div className="certificate-placeholder" />
+        )
+      )}
 
       {/* Actions */}
       {isEditing ? (
@@ -265,9 +369,226 @@ const SkillCard = ({ skill, isEditing, onSave, onCancel, onEditClick }) => {
           <button type="button" className="cancel-btn" onClick={onCancel}>Cancel</button>
         </div>
       ) : (
-        <button type="button" className="edit-skill-btn" onClick={onEditClick}>Edit</button>
+        <div className="skill-view-actions">
+          {isSuperuser && (
+            <>
+              <button type="button" className="edit-skill-btn" onClick={(e) => {
+                e.preventDefault();
+                onEditClick();
+              }}>Edit</button>
+              <button type="button" className="delete-skill-btn" onClick={onDelete} title="Delete skill">
+                <FaTrash size={16} />
+              </button>
+            </>
+          )}
+        </div>
       )}
     </form>
+  );
+};
+
+// Add Skill Form Component
+const AddSkillForm = ({ onSave, onCancel }) => {
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    proficiency: 3,
+    yearsExperience: 0,
+    projectsUsed: 0,
+    certificateLink: '',
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => setImagePreview(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      alert('Skill name is required');
+      return;
+    }
+    // Pass imageFile separately — SkillsCard will call uploadImage after create
+    await onSave({ ...form, imageFile });
+  };
+
+  // Check completion status
+  const hasName = form.name.trim().length > 0;
+  const hasDescription = form.description.trim().length > 0;
+  const hasImage = imagePreview !== null;
+
+  const recommendedComplete = hasName && hasDescription && hasImage;
+
+  return (
+    <div className="add-skill-form-container">
+      <div className="add-skill-form-wrapper">
+        <form className="add-skill-form" onSubmit={handleSubmit}>
+          <h3>Add New Skill</h3>
+
+          {/* Image + Name row */}
+          <div className="add-skill-row">
+            <div className="add-skill-image-container">
+              {imagePreview ? (
+                <img src={imagePreview} alt="Preview" className="add-skill-image" />
+              ) : (
+                <div className="add-skill-image-placeholder">No Image</div>
+              )}
+              <div className="add-skill-image-overlay" onClick={() => fileInputRef.current.click()}>
+                <FaUpload size={20} style={{ color: '#fff' }} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Skill Name *"
+              className="add-skill-name-input"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Description"
+            className="add-skill-textarea"
+            rows={2}
+          />
+
+          {/* Meta fields */}
+          <div className="add-skill-meta-row">
+            <div className="add-skill-field">
+              <label>Years Experience</label>
+              <input
+                type="number"
+                name="yearsExperience"
+                value={form.yearsExperience}
+                onChange={handleChange}
+                min={0}
+                step={0.5}
+                className="add-skill-input"
+              />
+            </div>
+
+            <div className="add-skill-field">
+              <label>Projects Used</label>
+              <input
+                type="number"
+                name="projectsUsed"
+                value={form.projectsUsed}
+                onChange={handleChange}
+                min={0}
+                className="add-skill-input"
+              />
+            </div>
+
+            <div className="add-skill-field">
+              <label>Proficiency (1-5)</label>
+              <div className="add-skill-stars">
+                {[...Array(5)].map((_, i) => (
+                  <FaStar
+                    size={18}
+                    key={i}
+                    className={i < form.proficiency ? 'star-filled' : 'star-empty'}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setForm((prev) => ({ ...prev, proficiency: i + 1 }))}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Certificate URL */}
+          <input
+            type="url"
+            name="certificateLink"
+            value={form.certificateLink}
+            onChange={handleChange}
+            placeholder="Certificate URL (optional)"
+            className="add-skill-input"
+          />
+
+          {/* Actions */}
+          <div className="add-skill-actions">
+            <button type="submit" className="add-skill-save-btn">Add Skill</button>
+            <button type="button" className="add-skill-cancel-btn" onClick={onCancel}>
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        {/* Side Alert Panel */}
+        <div className="add-skill-alert-panel">
+          <h4>Required & Recommended</h4>
+
+          <div className="add-skill-alert-item">
+            <div className={`alert-checkbox ${hasName ? 'checked' : ''}`}>
+              {hasName && <span>✓</span>}
+            </div>
+            <div className="alert-content">
+              <p className="alert-label">Skill Name *</p>
+              <p className="alert-hint">Required to create the skill</p>
+            </div>
+          </div>
+
+          <div className="add-skill-alert-item">
+            <div className={`alert-checkbox ${hasDescription ? 'checked' : ''}`}>
+              {hasDescription && <span>✓</span>}
+            </div>
+            <div className="alert-content">
+              <p className="alert-label">Description</p>
+              <p className="alert-hint">Recommended for context</p>
+            </div>
+          </div>
+
+          <div className="add-skill-alert-item">
+            <div className={`alert-checkbox ${hasImage ? 'checked' : ''}`}>
+              {hasImage && <span>✓</span>}
+            </div>
+            <div className="alert-content">
+              <p className="alert-label">Skill Image</p>
+              <p className="alert-hint">Recommended for visibility</p>
+            </div>
+          </div>
+
+          {/* Completion indicator */}
+          <div className={`add-skill-completion-bar ${recommendedComplete ? 'complete' : ''}`}>
+            <div
+              className="completion-fill"
+              style={{ width: `${(Object.values({ hasName, hasDescription, hasImage }).filter(Boolean).length / 3) * 100}%` }}
+            />
+          </div>
+          <p className="completion-text">
+            {recommendedComplete ? '✓ Ready to submit!' : 'Complete recommended fields'}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

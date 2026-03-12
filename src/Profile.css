@@ -35,6 +35,96 @@
   margin-bottom: 3rem;
 }
 
+/* Current learning / habits / stats */
+.current-section {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 3rem;
+}
+
+.left-col h2, .right-col h2 {
+  margin-top: 0;
+}
+
+.learning-list, .habit-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 1.25rem;
+}
+
+.learning-list li, .habit-list li {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.stat-card {
+  background: #fffef5;
+  border: 1px solid #ffeed0;
+  padding: 0.9rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.resources-section {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.resource-item {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resource-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.resource-type {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.resource-btn {
+  background: #ffdd1c;
+  color: #222;
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.resource-btn:hover {
+  background: #ffd700;
+}
+
 h2 {
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
@@ -95,4 +185,14 @@ h2::after {
   .profile-container {
     padding: 1rem;
   }
+  .current-section { grid-template-columns: 1fr; }
 }
+
+/* ── Gallery Section ──────────────────────────────────────────────────── */
+
+.gallery-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+

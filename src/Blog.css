@@ -135,25 +135,75 @@
 
 .blog-post-card-top-bar {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   background-color: hwb(0deg 20% 80%);
-  color: blue;
-  align-items: center;
+  padding: 8px 12px;
+  min-height: 56px;
+  box-sizing: border-box;
 }
 
-.blog-post-card-top-bar h2 {
-  padding: 15px;
-}
-
+.blog-post-card-top-bar h2,
 .blog-post-card-top-bar h3 {
+  display: none;
+}
+
+/* Title section - takes remaining space, truncates if needed */
+.blog-title {
   flex: 1;
-  padding: 15px;
-  margin: 0;
+  min-width: 0;
   color: white;
-  height: 100%;
-  /* margin-bottom: 20px; */
-  /* background-color: #000000; */
-  border-bottom: 1px solid #ddd;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Actions section - never shrinks, always visible */
+.blog-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* Icon button styling */
+.action-btn {
+  background: transparent;
+  border: none;
+  width: 38px;
+  height: 38px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.action-btn.edit {
+  background: rgba(255,255,255,0.15);
+}
+
+.action-btn.edit:hover {
+  background: rgba(255,255,255,0.25);
+  transform: scale(1.05);
+}
+
+.action-btn.delete {
+  background: rgba(255,69,69,0.25);
+}
+
+.action-btn.delete:hover {
+  background: rgba(255,69,69,0.4);
+  transform: scale(1.05);
 }
 
 .blog-post-preview {
@@ -185,34 +235,37 @@
 
 /* Overlay Editor Styles */
 .overlay {
-  position: sticky;
+  position: fixed;
   top: 0;
-  left: 0;
-  display: flex;
+  left: 408px; /* align with .card left offset */
   right: 0;
-  height: -webkit-fill-available;
-  padding: 20px;
-  margin:0;
   bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin: 0;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
-  z-index: 0;
+  z-index: 10000;
 }
 
 .edit-modal {
   position: relative;
-  margin: auto auto auto auto;
+  margin: auto;
   background-color: white;
   color: hwb(0deg 20% 80%);;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 200;
+  z-index: 10001;
   width: auto;
   height: auto;
   display: flex;
   flex-direction: column;
   padding: 20px;
   overflow: hidden;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .modal-header {
@@ -281,3 +334,18 @@
 }
 
 */
+
+/* Responsive adjustments: make overlay full-bleed on small screens */
+@media (max-width: 768px) {
+  .overlay {
+    left: 0;
+    right: 0;
+    padding: 12px;
+  }
+
+  .edit-modal {
+    max-width: 100%;
+    max-height: 100%;
+    margin: 8px;
+  }
+}

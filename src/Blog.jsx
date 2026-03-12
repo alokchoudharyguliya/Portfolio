@@ -1,91 +1,75 @@
 import "./Blog.css";
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRef } from "react";
-import React, { useState, useEffect } from 'react';
-import { useLocation, NavLink, redirect } from 'react-router-dom';
-import { FaBars, FaEdit, FaTrash } from 'react-icons/fa';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { useLocation, NavLink } from 'react-router-dom';
+import { FaBars } from 'react-icons/fa';
+import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import useBlogs from './hooks/useBlogs';
+import { usePermissions } from './contexts/PermissionsProvider';
+
 const BlogCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   const location = useLocation();
   const isActive = location.pathname === '/blog';
-  const [htmlCode, setHtmlCode] = useState('<h1>My Blog Post</h1>\n<p>\n\tWrite your content here...\n</p>');
-  const [cssCode, setCssCode] = useState(
-    'h1 { color: #333; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }\n' +
-    'p { font-size: 16px; line-height: 1.6; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }'
-  );
-  const [title, setTitle] = useState('My Blog Post');
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { blogs, loading, error, refetch, createBlog, updateBlog, deleteBlog } = useBlogs();
+  const { isSuperuser } = usePermissions();
+
+  const createInitialHtml = '<h1>My Blog Post</h1>\n<p>\n\tWrite your content here...\n</p>';
+  const createInitialCss = 'h1 { color: #333; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }\n' +
+    'p { font-size: 16px; line-height: 1.6; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }';
+  const createInitialTitle = 'My Blog Post';
+
+  // Create editor state (independent placeholders)
+  const [createHtml, setCreateHtml] = useState(createInitialHtml);
+  const [createCss, setCreateCss] = useState(createInitialCss);
+  const [createTitle, setCreateTitle] = useState(createInitialTitle);
+
+  // Edit modal state
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
-  const [modalSize, setModalSize] = useState({ width: 700, height: 600 });
-  // const [isDraggable, setIsDraggable] = useState(false);
-  // const draggableRef = useRef(null);
-  // Fetch blogs on component mount
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
+  const [editHtml, setEditHtml] = useState('');
+  const [editCss, setEditCss] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [modalSize] = useState({ width: 700, height: 600 });
 
-  const fetchBlogs = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/blogs'); // Replace with your actual API endpoint
-      console.log(response.data.blogs);
-      setBlogs(response.data.blogs);
-      // setBlogs([{title:"sad",html:"asd",css:"asd"}]);
-      setError('');
-    } catch (err) {
-      setError('Failed to fetch blogs');
-      // setBlogs([{ title: "sad", html: "asd", css: "asd" }]);
-      console.error('Error fetching blogs:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const editBlog = async (blog) => {
+  const openForEdit = (blog) => {
     setEditingBlog(blog);
-    console.log(blog);
-    setHtmlCode(blog.html);
-    setCssCode(blog.css);
-    setTitle(blog.title);
+    setEditHtml(blog.html || '');
+    setEditCss(blog.css || '');
+    setEditTitle(blog.title || '');
     setIsEditorOpen(true);
   };
-  const deleteBlog = async (id) => {
-    // console.log(id);
+
+  const handleCreate = async () => {
     try {
-      const respone = await axios.delete('http://localhost:3000/api/blog', { data: { blogId: id } });
-      console.log(respone);
-      fetchBlogs();
-      alert('Blog deleted successfully!');
-    }
-    catch (err) {
-      setError(err);
-    }
-  }
-  const saveBlog = async () => {
-    try {
-      setLoading(true);
-      await axios.post('http://localhost:3000/api/blog', { // Replace with your actual API endpoint
-        title,
-        html: htmlCode,
-        css: cssCode,
-        // createdAt: new Date().toISOString()
-      });
-      // Reset editor after save
-      setHtmlCode('<h1>My Blog Post</h1>\n<p>\n\tWrite your content here...\n</p>');
-      setCssCode('h1 { color: #333; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }\n' +
-        'p { font-size: 16px; line-height: 1.6; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }');
-      setTitle('My Blog Post');
-      // Refresh the blog list
-      await fetchBlogs();
-      alert('Blog saved successfully!');
+      await createBlog({ title: createTitle, html: createHtml, css: createCss });
+      setCreateHtml(createInitialHtml);
+      setCreateCss(createInitialCss);
+      setCreateTitle(createInitialTitle);
     } catch (err) {
-      setError('Failed to save blog');
-      console.error('Error saving blog:', err);
-    } finally {
-      setLoading(false);
+      console.error('Failed to create blog', err);
+      alert('Failed to create blog');
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editingBlog) return;
+    try {
+      await updateBlog(editingBlog.id, { title: editTitle, html: editHtml, css: editCss });
+      setIsEditorOpen(false);
+      setEditingBlog(null);
+    } catch (err) {
+      console.error('Failed to update blog', err);
+      alert('Failed to update blog');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this post?')) return;
+    try {
+      await deleteBlog(id);
+    } catch (err) {
+      console.error('Failed to delete blog', err);
+      alert('Failed to delete blog');
     }
   };
 
@@ -97,178 +81,85 @@ const BlogCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
           <FaBars />
         </NavLink>
       </div>
+
       <div className='card-body'>
         <div className="blog-editor-container">
-          <div className="blog-controls">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Blog post title"
-              className="blog-title-input"
-            />
-            <button onClick={saveBlog} className="save-button" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Blog'}
-            </button>
-          </div>
+          {isSuperuser && (
+            <div className="blog-controls">
+              <input
+                type="text"
+                value={createTitle}
+                onChange={(e) => setCreateTitle(e.target.value)}
+                placeholder="Blog post title"
+                className="blog-title-input"
+              />
+              <button onClick={handleCreate} className="save-button">Create Blog</button>
+            </div>
+          )}
 
           <div className="blog-editor-columns">
             <div className="editor-column">
               <h3>HTML Editor</h3>
-              <textarea
-                value={htmlCode}
-                onChange={(e) => setHtmlCode(e.target.value)}
-                className="code-editor html-editor"
-                spellCheck="false"
-              />
+              <textarea value={createHtml} onChange={(e) => setCreateHtml(e.target.value)} className="code-editor html-editor" spellCheck="false" />
             </div>
 
             <div className="editor-column">
               <h3>CSS Editor</h3>
-              <textarea
-                value={cssCode}
-                onChange={(e) => setCssCode(e.target.value)}
-                className="code-editor css-editor"
-                spellCheck="false"
-              />
+              <textarea value={createCss} onChange={(e) => setCreateCss(e.target.value)} className="code-editor css-editor" spellCheck="false" />
             </div>
 
             <div className="preview-column">
               <h3>Live Preview</h3>
               <div className="blog-preview">
-                <iframe
-                  title="blog-preview"
-                  srcDoc={`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                      <style>${cssCode}</style>
-                    </head>
-                    <body>
-                      ${htmlCode}
-                    </body>
-                    </html>
-                  `}
-                  className="preview-iframe"
-                />
+                <iframe title="blog-preview" srcDoc={`<!DOCTYPE html><html><head><style>${createCss}</style></head><body>${createHtml}</body></html>`} className="preview-iframe" />
               </div>
             </div>
           </div>
         </div>
+
         <AnimatePresence>
           {isEditorOpen && (
-            <>
-              <motion.div
-                className="overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsEditorOpen(false)}
-              >
-                <motion.div
-                  className="edit-modal"
-                  style={{
-                    width: modalSize.width + 'px',
-                    height: modalSize.height + 'px'
-                  }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                >
-                  <div className="modal-header">
-                    <h2>Edit Blog: {editingBlog?.title}</h2>
-                    <div className="header-controls">
+            <motion.div className="overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsEditorOpen(false); setEditingBlog(null); }}>
+              <motion.div className="edit-modal" style={{ width: modalSize.width + 'px', height: modalSize.height + 'px' }} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()}>
 
-                      <button onClick={() => setIsEditorOpen(false)} className="close-button">
-                        &times;
-                      </button>
-                    </div>
+                <div className="modal-header">
+                  <h2>Edit Blog: {editingBlog?.title}</h2>
+                  <div className="header-controls">
+                    <button onClick={() => { setIsEditorOpen(false); setEditingBlog(null); }} className="close-button">&times;</button>
+                  </div>
+                </div>
+
+                <div className="blog-editor-container" style={{ height: 'calc(100% - 60px)' }}>
+                  <div className="blog-controls">
+                    <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Blog post title" className="blog-title-input" />
+                    <button onClick={handleUpdate} className="save-button" disabled={loading}>{loading ? 'Saving...' : 'Update Blog'}</button>
                   </div>
 
-                  <div className="blog-editor-container" style={{ height: 'calc(100% - 60px)' }}>
-                    <div className="blog-controls">
-                      <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Blog post title"
-                        className="blog-title-input"
-                      />
-                      <button
-                        onClick={async () => {
-                          try {
-                            const response = await axios.put('http://localhost:3000/api/blog', {
-                              data: {
-                                id: editingBlog.id,
-                                title,
-                                html: htmlCode,
-                                css: cssCode
-                              }
-                            });
-                            console.log(response);
-                            fetchBlogs();
-                            setIsEditorOpen(false);
-                          } catch (err) {
-                            setError(err);
-                          }
-                        }}
-                        className="save-button"
-                        disabled={loading}
-                      >
-                        {loading ? 'Saving...' : 'Update Blog'}
-                      </button>
+                  <div className="blog-editor-columns" style={{ height: 'calc(100% - 50px)' }}>
+                    <div className="editor-column">
+                      <h3>HTML Editor</h3>
+                      <textarea value={editHtml} onChange={(e) => setEditHtml(e.target.value)} className="code-editor html-editor" spellCheck="false" />
                     </div>
 
-                    <div className="blog-editor-columns" style={{ height: 'calc(100% - 50px)' }}>
-                      <div className="editor-column">
-                        <h3>HTML Editor</h3>
-                        <textarea
-                          value={htmlCode}
-                          onChange={(e) => setHtmlCode(e.target.value)}
-                          className="code-editor html-editor"
-                          spellCheck="false"
-                        />
-                      </div>
+                    <div className="editor-column">
+                      <h3>CSS Editor</h3>
+                      <textarea value={editCss} onChange={(e) => setEditCss(e.target.value)} className="code-editor css-editor" spellCheck="false" />
+                    </div>
 
-                      <div className="editor-column">
-                        <h3>CSS Editor</h3>
-                        <textarea
-                          value={cssCode}
-                          onChange={(e) => setCssCode(e.target.value)}
-                          className="code-editor css-editor"
-                          spellCheck="false"
-                        />
-                      </div>
-
-                      <div className="preview-column">
-                        <h3>Live Preview</h3>
-                        <div className="blog-preview">
-                          <iframe
-                            title="blog-preview"
-                            srcDoc={`
-                          <!DOCTYPE html>
-                          <html>
-                          <head>
-                            <style>${cssCode}</style>
-                          </head>
-                          <body>
-                            ${htmlCode}
-                          </body>
-                          </html>
-                        `}
-                            className="preview-iframe"
-                          />
-                        </div>
+                    <div className="preview-column">
+                      <h3>Live Preview</h3>
+                      <div className="blog-preview">
+                        <iframe title="blog-preview-edit" srcDoc={`<!DOCTYPE html><html><head><style>${editCss}</style></head><body>${editHtml}</body></html>`} className="preview-iframe" />
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
+
               </motion.div>
-            </>
+            </motion.div>
           )}
         </AnimatePresence>
-        {/* Blog Posts Section */}
+
         <div className="blog-posts-section">
           <h2>Saved Blog Posts</h2>
           {error && <div className="error-message">{error}</div>}
@@ -279,30 +170,21 @@ const BlogCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
               {blogs.map((blog) => (
                 <div key={blog.id} className="blog-post-card">
                   <div className="blog-post-card-top-bar">
-                    <h2 onClick={() => {
-                      deleteBlog(blog.id);
-                    }}><FaTrash color="white" /></h2>
-                    <h2 onClick={() => {
-                      editBlog(blog);
-                    }}><FaEdit color="white" /></h2>
+                    <div className="blog-title" title={blog.title}>{blog.title}</div>
 
-                    <h3>{blog.title}</h3>
+                    {isSuperuser && (
+                      <div className="blog-actions">
+                        <button className="action-btn edit" aria-label="Edit blog" onClick={() => openForEdit(blog)}>
+                          <FiEdit size={18} />
+                        </button>
+                        <button className="action-btn delete" aria-label="Delete blog" onClick={() => handleDelete(blog.id)}>
+                          <FiTrash2 size={18} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="blog-post-preview">
-                    <iframe
-                      title={`blog-preview-${blog.id}`}
-                      srcDoc={`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                          <style>${blog.css}</style>
-                        </head>
-                        <body>
-                          ${blog.html}
-                        </body>
-                        </html>
-                      `}
-                    />
+                    <iframe title={`blog-preview-${blog.id}`} srcDoc={`<!DOCTYPE html><html><head><style>${blog.css}</style></head><body>${blog.html}</body></html>`} />
                   </div>
                   <div className="blog-post-meta">
                     <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
@@ -312,142 +194,8 @@ const BlogCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
             </div>
           )}
         </div>
-        
+
       </div>
-      <AnimatePresence style={{position:"relative"}}>
-        {isEditorOpen && (
-          <motion.div
-            className="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsEditorOpen(false)}
-            onMouse
-          >
-            <motion.div
-              className="edit-modal"
-              style={{
-                width: modalSize.width + 'px',
-                height: modalSize.height + 'px'
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onMouseCapture={() => console.log("Parent captured click first")}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            >
-              <div className="modal-header">
-                <h2>Edit Blog: {editingBlog?.title}</h2>
-                <div className="header-controls">
-                  {/* <label className="drag-toggle">
-                        <input
-                          type="checkbox"
-                          checked={isDraggable}
-                          onChange={() => setIsDraggable(!isDraggable)}
-                        />
-                        Draggable
-                      </label> */}
-                  <button onClick={() => {
-                    console.log("Hey");
-                    setIsEditorOpen(false);
-                  }
-                  } className="close-button">
-                    &times;
-                  </button>
-                </div>
-              </div>
-
-              <div className="blog-editor-container" style={{ height: 'calc(100% - 60px)' }}>
-                <div className="blog-controls">
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Blog post title"
-                    className="blog-title-input"
-                  />
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await axios.put('http://localhost:3000/api/blog', {
-                          blog: {
-                            id: editingBlog.id,
-                            title,
-                            html: htmlCode,
-                            css: cssCode
-                          }
-                        });
-                        console.log(response);
-                        alert('Blog Edited successfully!');
-                        setHtmlCode('<h1>My Blog Post</h1>\n<p>\n\tWrite your content here...\n</p>');
-                        setCssCode('h1 { color: #333; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }\n' +
-                          'p { font-size: 16px; line-height: 1.6; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }');
-                        setTitle('My Blog Post');
-                        // Refresh the blog list
-                        await fetchBlogs();
-                        // fetchBlogs();
-                        setIsEditorOpen(false);
-                      } catch (err) {
-                        setError(err);
-                      }
-                    }}
-                    className="save-button"
-                    disabled={loading}
-                  >
-                    {loading ? 'Saving...' : 'Update Blog'}
-                  </button>
-                </div>
-
-                <div className="blog-editor-columns" style={{
-                  //  height: 'calc(100% - 50px)' 
-                }}>
-                  <div className="editor-column">
-                    <h3>HTML Editor</h3>
-                    <textarea
-                      value={htmlCode}
-                      onChange={(e) => setHtmlCode(e.target.value)}
-                      className="code-editor html-editor"
-                      spellCheck="false"
-                    />
-                  </div>
-
-                  <div className="editor-column">
-                    <h3>CSS Editor</h3>
-                    <textarea
-                      value={cssCode}
-                      onChange={(e) => setCssCode(e.target.value)}
-                      className="code-editor css-editor"
-                      spellCheck="false"
-                    />
-                  </div>
-
-                  <div className="preview-column">
-                    <h3>Live Preview</h3>
-                    <div className="blog-preview">
-                      <iframe
-                        title="blog-preview"
-                        srcDoc={`
-                          <!DOCTYPE html>
-                          <html>
-                          <head>
-                            <style>${cssCode}</style>
-                          </head>
-                          <body>
-                            ${htmlCode}
-                          </body>
-                          </html>
-                        `}
-                        className="preview-iframe"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div >
   );
 };

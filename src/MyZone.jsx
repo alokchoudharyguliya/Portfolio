@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import useTodos from './hooks/useTodos';
+import useExpenses from './hooks/useExpenses';
+import useAlbums from './hooks/useAlbums';
+import { usePermissions } from './contexts/PermissionsProvider';
 import { NavLink } from 'react-router-dom';
 import { FaBars, FaTrash, FaPlus, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
@@ -8,15 +12,20 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   const location = useLocation();
   const isActive = location.pathname === '/myzone';
 
-  // ToDo State
-  const [todos, setTodos] = useState([
-    { id: 1, title: 'Complete React project', description: 'Build a responsive dashboard with React hooks', priority: 1, completed: false },
-    { id: 5, title: 'Fix API endpoints', description: 'Debug and optimize backend API calls', priority: 2, completed: false },
-    { id: 6, title: 'Design UI mockups', description: 'Create wireframes for new features', priority: 3, completed: false },
-    { id: 4, title: 'Database migration', description: 'Migrate data to PostgreSQL', priority: 4, completed: false },
-    { id: 3, title: 'Code review', description: 'Review pull requests from team members', priority: 5, completed: false },
-    { id: 2, title: 'Write blog post', description: 'Document best practices for React state management', priority: 6, completed: true },
-  ]);
+  // ToDo State (fetched from backend)
+  // useTodos hook provides `todos` and CRUD operations
+  const {
+    todos,
+    loading: todosLoading,
+    error: todosError,
+    refetch: refetchTodos,
+    createTodo,
+    updateTodo,
+    deleteTodo: apiDeleteTodo,
+    toggleTodo: apiToggleTodo,
+  } = useTodos();
+  const { isSuperuser } = usePermissions();
+  const {expenses, totalExpenditure, loading:expensesLoading,error:expensesError,refetch:refetchExpenses,createExpense,updateExpense,deleteExpense}=useExpenses()
   const [todoInput, setTodoInput] = useState('');
   const [todoDescription, setTodoDescription] = useState('');
   const [todoPriority, setTodoPriority] = useState('1');
@@ -25,145 +34,78 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   const [editDescription, setEditDescription] = useState('');
   const [editPriority, setEditPriority] = useState('1');
 
-  // Expense Tracker State
-  const [expenses, setExpenses] = useState([
-    { id: 1, category: 'Food', amount: 250, date: '2024-03-05', description: 'Lunch at restaurant', createdAt: '2024-03-05' },
-    { id: 2, category: 'Transport', amount: 150, date: '2024-03-06', description: 'Uber commute to office', createdAt: '2024-03-06' },
-  ]);
+  // Expense Tracker State (fetched from backend via `useExpenses`)
   const [expenseForm, setExpenseForm] = useState({ category: '', amount: '', date: '', description: '' });
   const [expenseSortBy, setExpenseSortBy] = useState('createdAt');
   const [expenseSortOrder, setExpenseSortOrder] = useState('desc');
 
-  // Gallery State
-  const [albums, setAlbums] = useState([
-    { 
-      id: 1, 
-      name: 'Travel 2024', 
-      images: [
-        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1502581578749-8d8dafce60c6?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1532274040911-5f82f20ae318?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop',
-      ]
-    },
-    { 
-      id: 2, 
-      name: 'Events', 
-      images: [
-        'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=300&fit=crop',
-      ]
-    },
-    {
-      id: 3,
-      name: 'Nature & Wildlife',
-      images: [
-        'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1504006833117-8886a355efbf?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400&h=300&fit=crop',
-      ]
-    },
-    {
-      id: 4,
-      name: 'Food & Dining',
-      images: [
-        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
-      ]
-    },
-    {
-      id: 5,
-      name: 'City Life',
-      images: [
-        'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?w=400&h=300&fit=crop',
-      ]
-    },
-    {
-      id: 6,
-      name: 'People & Portraits',
-      images: [
-        'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
-      ]
-    },
-    {
-      id: 7,
-      name: 'Architecture',
-      images: [
-        'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1480837539958-13e4affa7a78?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1460317442991-0ec209397118?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1464146072230-91cabc968266?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop',
-      ]
-    },
-    {
-      id: 8,
-      name: 'Sunsets & Skies',
-      images: [
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=400&h=300&fit=crop',
-      ]
-    },
-  ]);
+  // Gallery (backed by API)
+  const {
+    albums,
+    loading: albumsLoading,
+    error: albumsError,
+    refetch: refetchAlbums,
+    createAlbum: apiCreateAlbum,
+    deleteAlbum: apiDeleteAlbum,
+    uploadImage,
+    deleteImage: apiDeleteImage,
+    moveImage: apiMoveImage,
+    addLocalImage,
+  } = useAlbums();
   const [albumName, setAlbumName] = useState('');
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [editingAlbumId, setEditingAlbumId] = useState(null);
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [uploadFile, setUploadFile] = useState(null);
+  const [moveTargets, setMoveTargets] = useState({});
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadModalAlbumId, setUploadModalAlbumId] = useState(null);
 
   // ToDo Handlers
-  const addTodo = () => {
-    if (todoInput.trim() && todoDescription.trim()) {
-      setTodos([...todos, { id: Date.now(), title: todoInput, description: todoDescription, priority: parseInt(todoPriority), completed: false }]);
+  const addTodo = async () => {
+    if (!todoInput.trim() || !todoDescription.trim()) return;
+    try {
+      await createTodo({ title: todoInput, description: todoDescription, priority: parseInt(todoPriority), completed: false });
       setTodoInput('');
       setTodoDescription('');
       setTodoPriority('1');
+    } catch (err) {
+      console.error('createTodo failed', err);
     }
   };
 
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
+  const toggleTodo = async (id) => {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+    try {
+      await apiToggleTodo(id, !todo.completed);
+    } catch (err) {
+      console.error('toggle failed', err);
+    }
   };
 
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+  const deleteTodo = async (id) => {
+    try {
+      await apiDeleteTodo(id);
+    } catch (err) {
+      console.error('delete failed', err);
+    }
   };
 
   const startEdit = (todo) => {
     setEditingId(todo.id);
     setEditTitle(todo.title);
     setEditDescription(todo.description);
-    setEditPriority(todo.priority.toString());
+    setEditPriority((todo.priority || 1).toString());
   };
 
-  const saveEdit = (id) => {
-    if (editTitle.trim() && editDescription.trim()) {
-      setTodos(todos.map(todo => 
-        todo.id === id 
-          ? { ...todo, title: editTitle, description: editDescription, priority: parseInt(editPriority) } 
-          : todo
-      ));
+  const saveEdit = async (id) => {
+    if (!editTitle.trim() || !editDescription.trim()) return;
+    try {
+      await updateTodo(id, { title: editTitle, description: editDescription, priority: parseInt(editPriority) });
       setEditingId(null);
+    } catch (err) {
+      console.error('update failed', err);
     }
   };
 
@@ -174,80 +116,104 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
   const sortedTodos = [...todos].sort((a, b) => a.priority - b.priority);
 
   // Expense Handlers
-  const addExpense = () => {
-    if (expenseForm.category && expenseForm.amount && expenseForm.date && expenseForm.description) {
-      setExpenses([...expenses, { id: Date.now(), ...expenseForm, amount: parseFloat(expenseForm.amount), createdAt: new Date().toISOString().split('T')[0] }]);
+  const addExpense = async () => {
+    if (!(expenseForm.category && expenseForm.amount && expenseForm.date && expenseForm.description)) return;
+    try {
+      await createExpense({ ...expenseForm, amount: parseFloat(expenseForm.amount) });
       setExpenseForm({ category: '', amount: '', date: '', description: '' });
+    } catch (err) {
+      console.error('createExpense failed', err);
     }
   };
 
-  const deleteExpense = (id) => {
-    setExpenses(expenses.filter(exp => exp.id !== id));
-  };
+  // const deleteExpense = async (id) => {
+  //   try {
+  //     await deleteExpense(id);
+  //   } catch (err) {
+  //     console.error('deleteExpense failed', err);
+  //   }
+  // };
 
-  const totalExpense = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalExpense = totalExpenditure || 0;
 
-  const getSortedExpenses = () => {
-    let sorted = [...expenses];
-    sorted.sort((a, b) => {
-      let compareVal = 0;
-      if (expenseSortBy === 'amount') {
-        compareVal = a.amount - b.amount;
-      } else if (expenseSortBy === 'createdAt') {
-        compareVal = new Date(a.createdAt) - new Date(b.createdAt);
-      }
-      return expenseSortOrder === 'asc' ? compareVal : -compareVal;
-    });
-    return sorted;
-  };
+  // Server-side ordering is used; return list as provided by backend.
+  const getSortedExpenses = () => Array.isArray(expenses) ? expenses : [];
 
   // Album Handlers
-  const addAlbum = () => {
-    if (albumName.trim()) {
-      setAlbums([...albums, { id: Date.now(), name: albumName, images: [] }]);
+  const addAlbum = async () => {
+    if (!albumName.trim()) return;
+    try {
+      await apiCreateAlbum({ title: albumName });
       setAlbumName('');
+      refetchAlbums();
+    } catch (err) {
+      console.error('create album failed', err);
     }
   };
 
-  const deleteAlbum = (id) => {
-    setAlbums(albums.filter(album => album.id !== id));
+  const deleteAlbum = async (id) => {
+    try {
+      await apiDeleteAlbum(id);
+      refetchAlbums();
+    } catch (err) {
+      console.error('delete album failed', err);
+    }
   };
 
   // Album Image Handlers
-  const addImageToAlbum = (albumId) => {
-    if (newImageUrl.trim()) {
-      setAlbums(albums.map(album =>
-        album.id === albumId
-          ? { ...album, images: [...album.images, newImageUrl] }
-          : album
-      ));
-      setNewImageUrl('');
+  const addImageToAlbum = async (albumId, file, title) => {
+    if (!file) return;
+    try {
+      const created = await uploadImage(albumId, file, title);
+      return created;
+    } catch (err) {
+      console.error('add image failed', err);
+      throw err;
     }
   };
 
-  const deleteImageFromAlbum = (albumId, imageIndex) => {
-    setAlbums(albums.map(album =>
-      album.id === albumId
-        ? { ...album, images: album.images.filter((_, idx) => idx !== imageIndex) }
-        : album
-    ));
+  const deleteImageFromAlbum = async (albumId, imageId, idx) => {
+    try {
+      if (imageId) {
+        await apiDeleteImage(albumId, imageId);
+        // also refetch global albums to keep in sync
+        refetchAlbums();
+      } else if (typeof idx === 'number') {
+        // remove local non-uploaded image by index
+        setSelectedAlbum(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }));
+      }
+    } catch (err) {
+      console.error('delete image failed', err);
+    }
   };
 
-  const moveImageInAlbum = (albumId, fromIndex, toIndex) => {
-    setAlbums(albums.map(album => {
-      if (album.id === albumId) {
-        const newImages = [...album.images];
-        const [movedImage] = newImages.splice(fromIndex, 1);
-        newImages.splice(toIndex, 0, movedImage);
-        return { ...album, images: newImages };
-      }
-      return album;
-    }));
+  const moveImageInAlbum = async (albumId, imageId, targetAlbumId, idx) => {
+    try {
+      if (!imageId) return; // only move uploaded images via API
+      await apiMoveImage(albumId, imageId, targetAlbumId);
+      // remove from current modal view
+      setSelectedAlbum(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }));
+      // refresh global albums to reflect server change
+      refetchAlbums();
+    } catch (err) {
+      console.error('move image failed', err);
+    }
   };
 
   const startEditingAlbum = (album) => {
     setEditingAlbumId(album.id);
     setSelectedAlbum(album);
+  };
+
+  const openUploadModal = (albumId) => {
+    setUploadModalAlbumId(albumId);
+    setShowUploadModal(true);
+  };
+
+  const closeUploadModal = () => {
+    setShowUploadModal(false);
+    setUploadModalAlbumId(null);
+    setUploadFile(null);
   };
 
   return (
@@ -275,6 +241,7 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
             </div>
           </div>
           <div className='section-content'>
+            {isSuperuser && (
             <div className='input-group'>
               <input
                 type='text'
@@ -303,6 +270,7 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                 <FaPlus />
               </button>
             </div>
+            )}
             <div className='todos-list'>
               {sortedTodos.length === 0 && (
                 <div className='todos-empty-state'>
@@ -314,13 +282,15 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                 <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
                   {editingId === todo.id ? (
                     <>
-                      <input
-                        type='checkbox'
-                        checked={todo.completed}
-                        onChange={() => toggleTodo(todo.id)}
-                        className='todo-checkbox'
-                        disabled
-                      />
+                      {isSuperuser && (
+                        <input
+                          type='checkbox'
+                          checked={todo.completed}
+                          onChange={() => toggleTodo(todo.id)}
+                          className='todo-checkbox'
+                          disabled
+                        />
+                      )}
                       <div className='todo-edit-form'>
                         <input
                           type='text'
@@ -355,12 +325,14 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                     </>
                   ) : (
                     <>
-                      <input
-                        type='checkbox'
-                        checked={todo.completed}
-                        onChange={() => toggleTodo(todo.id)}
-                        className='todo-checkbox'
-                      />
+                      {isSuperuser && (
+                        <input
+                          type='checkbox'
+                          checked={todo.completed}
+                          onChange={() => toggleTodo(todo.id)}
+                          className='todo-checkbox'
+                        />
+                      )}
                       <div className='todo-content'>
                         <div className='todo-header'>
                           <span className='todo-title'>{todo.title}</span>
@@ -369,12 +341,16 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                         <span className='todo-description'>{todo.description}</span>
                       </div>
                       <div className='todo-actions'>
-                        <button onClick={() => startEdit(todo)} className='edit-btn' title='Edit'>
-                          <FaEdit />
-                        </button>
-                        <button onClick={() => deleteTodo(todo.id)} className='delete-btn' title='Delete'>
-                          <FaTrash />
-                        </button>
+                        {isSuperuser && (
+                          <>
+                            <button onClick={() => startEdit(todo)} className='edit-btn' title='Edit'>
+                              <FaEdit />
+                            </button>
+                            <button onClick={() => deleteTodo(todo.id)} className='delete-btn' title='Delete'>
+                              <FaTrash />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </>
                   )}
@@ -391,6 +367,7 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
             <span className='total-expense'>Total: ₹{totalExpense.toFixed(2)}</span>
           </div>
           <div className='section-content'>
+            {isSuperuser && (
             <div className='expense-form'>
               <input
                 type='text'
@@ -412,29 +389,49 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                 onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })}
                 className='expense-input'
               />
-              <input
-                type='text'
+              <textarea
                 placeholder='Description'
                 value={expenseForm.description}
                 onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-                className='expense-input'
+                className='expense-textarea'
+                rows={4}
               />
               <button onClick={addExpense} className='add-btn'>
                 <FaPlus />
               </button>
             </div>
+            )}
             <div className='sort-controls'>
-              <select 
-                value={expenseSortBy} 
-                onChange={(e) => setExpenseSortBy(e.target.value)}
+              <select
+                value={expenseSortBy}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setExpenseSortBy(v);
+                  const dir = expenseSortOrder === 'asc' ? '' : '-';
+                  let field = 'created_at';
+                  if (v === 'amount') field = 'amount';
+                  else if (v === 'createdAt') field = 'created_at';
+                  else if (v === 'date') field = 'date';
+                  refetchExpenses({ ordering: dir + field });
+                }}
                 className='sort-select'
               >
                 <option value='createdAt'>Sort by Date Created</option>
+                <option value='date'>Sort by Expense Date</option>
                 <option value='amount'>Sort by Amount</option>
               </select>
-              <select 
-                value={expenseSortOrder} 
-                onChange={(e) => setExpenseSortOrder(e.target.value)}
+              <select
+                value={expenseSortOrder}
+                onChange={(e) => {
+                  const dirVal = e.target.value;
+                  setExpenseSortOrder(dirVal);
+                  const dir = dirVal === 'asc' ? '' : '-';
+                  let field = 'created_at';
+                  if (expenseSortBy === 'amount') field = 'amount';
+                  else if (expenseSortBy === 'createdAt') field = 'created_at';
+                  else if (expenseSortBy === 'date') field = 'date';
+                  refetchExpenses({ ordering: dir + field });
+                }}
                 className='sort-select'
               >
                 <option value='desc'>Descending</option>
@@ -455,12 +452,14 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                     <span className='expense-description'>{exp.description}</span>
                     <span className='expense-date'>{exp.date}</span>
                   </div>
-                  <div className='expense-amount'>
-                    <span>₹{exp.amount.toFixed(2)}</span>
-                    <button onClick={() => deleteExpense(exp.id)} className='delete-btn'>
-                      <FaTrash />
-                    </button>
-                  </div>
+                    <div className='expense-amount'>
+                      <span>₹{exp.amount.toFixed(2)}</span>
+                      {isSuperuser && (
+                        <button onClick={() => deleteExpense(exp.id)} className='delete-btn'>
+                          <FaTrash />
+                        </button>
+                      )}
+                    </div>
                 </div>
               ))}
             </div>
@@ -473,6 +472,7 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
             <h3>🎨 Gallery Albums</h3>
           </div>
           <div className='section-content'>
+            {isSuperuser && (
             <div className='input-group'>
               <input
                 type='text'
@@ -486,6 +486,7 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                 <FaPlus />
               </button>
             </div>
+            )}
             <div className='albums-list'>
               {albums.length === 0 && (
                 <div className='albums-empty-state'>
@@ -498,31 +499,39 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                   <div className='album-header'>
                     <h4>{album.name}</h4>
                     <div className='album-header-actions'>
-                      <button 
-                        onClick={() => startEditingAlbum(album)}
-                        className='edit-btn'
-                        title='Edit album'
-                      >
-                        <FaEdit />
-                      </button>
-                      <button onClick={() => deleteAlbum(album.id)} className='delete-btn' title='Delete album'>
-                        <FaTrash />
-                      </button>
+                      {isSuperuser && (
+                        <>
+                          <button 
+                            onClick={() => startEditingAlbum(album)}
+                            className='edit-btn'
+                            title='Edit album'
+                          >
+                            <FaEdit />
+                          </button>
+                          <button onClick={() => deleteAlbum(album.id)} className='delete-btn' title='Delete album'>
+                            <FaTrash />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className='album-content'>
                     {album.images.length > 0 ? (
                       <>
                         <div className='album-thumbnails'>
-                          {album.images.slice(0, 3).map((img, idx) => (
-                            <img 
-                              key={idx} 
-                              src={img} 
-                              alt={`thumb-${idx}`}
-                              className='thumbnail'
-                              onClick={() => setFullscreenImage(img)}
-                            />
-                          ))}
+                          {album.images.slice(0, 3).map((img, idx) => {
+                            const src = (img && typeof img === 'object') ? (img.image || img.url) : img;
+                            const key = (img && typeof img === 'object' && img.id) ? img.id : idx;
+                            return (
+                              <img
+                                key={key}
+                                src={src}
+                                alt={`thumb-${idx}`}
+                                className='thumbnail'
+                                onClick={() => setFullscreenImage(src)}
+                              />
+                            );
+                          })}
                         </div>
                         <button 
                           onClick={() => setSelectedAlbum(album)}
@@ -554,70 +563,87 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
               <h3 className='modal-title'>{selectedAlbum.name}</h3>
 
               {/* Add Image Section */}
-              {editingAlbumId === selectedAlbum.id && (
-                <div className='album-add-image-section'>
-                  <input
-                    type='text'
-                    placeholder='Paste image URL here...'
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addImageToAlbum(selectedAlbum.id)}
-                    className='image-url-input'
-                  />
+              {editingAlbumId === selectedAlbum.id && isSuperuser && (
+                <div style={{ marginBottom: 20, textAlign: 'center' }}>
                   <button 
-                    onClick={() => addImageToAlbum(selectedAlbum.id)}
+                    onClick={() => openUploadModal(selectedAlbum.id)}
                     className='add-image-btn'
+                    style={{ margin: '0 auto' }}
                   >
-                    <FaPlus /> Add Image
+                    <FaPlus /> Upload Image
                   </button>
                 </div>
               )}
 
               <div className='modal-images-grid-container'>
                 <div className='modal-images-grid'>
-                  {selectedAlbum.images.map((img, idx) => (
-                    <div key={idx} className='modal-image-wrapper'>
-                      <img
-                        src={img}
-                        alt={`${selectedAlbum.name}-${idx}`}
-                        className='modal-image'
-                        onClick={() => setFullscreenImage(img)}
-                      />
-                      {editingAlbumId === selectedAlbum.id && (
-                        <div className='image-controls'>
-                          <button 
-                            onClick={() => deleteImageFromAlbum(selectedAlbum.id, idx)}
-                            className='delete-image-btn'
-                            title='Delete image'
-                          >
-                            <FaTrash />
-                          </button>
-                          <div className='image-move-buttons'>
+                  {selectedAlbum.images.map((img, idx) => {
+                    const isObject = img && typeof img === 'object';
+                    const src = isObject ? (img.image || img.url) : img;
+                    const imgId = isObject ? img.id : null;
+                    const key = imgId || idx;
+                    return (
+                      <div key={imgId || idx} className='modal-image-wrapper'>
+                        <img
+                          src={src}
+                          alt={`${selectedAlbum.name}-${idx}`}
+                          className='modal-image'
+                          onClick={() => setFullscreenImage(src)}
+                        />
+                        {editingAlbumId === selectedAlbum.id && isSuperuser && (
+                          <div className='image-controls'>
                             <button 
-                              onClick={() => moveImageInAlbum(selectedAlbum.id, idx, Math.max(0, idx - 1))}
-                              disabled={idx === 0}
-                              className='move-btn'
-                              title='Move left'
+                              onClick={async () => {
+                                try {
+                                  await deleteImageFromAlbum(selectedAlbum.id, imgId || null, idx);
+                                  setSelectedAlbum(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }));
+                                  refetchAlbums();
+                                } catch (err) {
+                                  console.error('delete image failed', err);
+                                }
+                              }}
+                              className='delete-image-btn'
+                              title='Delete image'
                             >
-                              ←
+                              <FaTrash />
                             </button>
-                            <button 
-                              onClick={() => moveImageInAlbum(selectedAlbum.id, idx, Math.min(selectedAlbum.images.length - 1, idx + 1))}
-                              disabled={idx === selectedAlbum.images.length - 1}
-                              className='move-btn'
-                              title='Move right'
-                            >
-                              →
-                            </button>
+                            <div className='image-move-actions'>
+                              <select
+                                className='move-select'
+                                value={moveTargets[key] || ''}
+                                onChange={(e) => setMoveTargets(prev => ({ ...prev, [key]: e.target.value }))}
+                              >
+                                <option value=''>Move to...</option>
+                                {albums.filter(a => a.id !== selectedAlbum.id).map(a => (
+                                  <option key={a.id} value={a.id}>{a.name}</option>
+                                ))}
+                              </select>
+                              <button
+                                className='move-action-btn'
+                                disabled={!moveTargets[key]}
+                                onClick={async () => {
+                                  const target = moveTargets[key];
+                                  if (!target) return;
+                                  try {
+                                    await moveImageInAlbum(selectedAlbum.id, imgId, target, idx);
+                                    setMoveTargets(prev => ({ ...prev, [key]: '' }));
+                                  } catch (err) {
+                                    console.error('move failed', err);
+                                  }
+                                }}
+                              >
+                                Move
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className='modal-footer'>
+                <div className='modal-footer'>
                 {editingAlbumId === selectedAlbum.id ? (
                   <button 
                     onClick={() => setEditingAlbumId(null)}
@@ -626,12 +652,14 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
                     Done Editing
                   </button>
                 ) : (
-                  <button 
-                    onClick={() => startEditingAlbum(selectedAlbum)}
-                    className='edit-modal-btn'
-                  >
-                    <FaEdit /> Edit Images
-                  </button>
+                  isSuperuser ? (
+                    <button 
+                      onClick={() => startEditingAlbum(selectedAlbum)}
+                      className='edit-modal-btn'
+                    >
+                      <FaEdit /> Edit Images
+                    </button>
+                  ) : null
                 )}
               </div>
             </div>
@@ -652,6 +680,57 @@ const MyZoneCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
               alt='fullscreen'
               className='fullscreen-image'
             />
+          </div>
+        )}
+
+        {/* Upload Image Modal */}
+        {showUploadModal && (
+          <div className='modal-overlay' onClick={closeUploadModal}>
+            <div className='modal-content upload-modal-content' onClick={(e) => e.stopPropagation()}>
+              <button 
+                className='modal-close' 
+                onClick={closeUploadModal}
+              >
+                ✕
+              </button>
+              <h3 className='modal-title'>Upload Image</h3>
+              <div className='upload-modal-body'>
+                <label className='upload-label-large'>
+                  <input
+                    type='file'
+                    accept='image/*'
+                    className='upload-input'
+                    onChange={(e) => setUploadFile(e.target.files && e.target.files[0])}
+                  />
+                  📸 Choose Image
+                </label>
+                {uploadFile && (
+                  <div className='upload-preview-large'>
+                    <span className='file-name-large'>✓ {uploadFile.name}</span>
+                  </div>
+                )}
+                <button 
+                  onClick={async () => {
+                    if (!uploadFile || !uploadModalAlbumId) return;
+                    try {
+                      const created = await addImageToAlbum(uploadModalAlbumId, uploadFile, '');
+                      // update local modal view
+                      setSelectedAlbum(prev => ({ ...prev, images: [...(prev.images||[]), created] }));
+                      closeUploadModal();
+                      // refresh global albums state
+                      refetchAlbums();
+                    } catch (err) {
+                      console.error('upload failed', err);
+                    }
+                  }}
+                  className='add-image-btn'
+                  disabled={!uploadFile}
+                  style={{ alignSelf: 'center', marginTop: 16 }}
+                >
+                  <FaPlus /> Upload
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

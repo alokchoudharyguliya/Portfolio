@@ -1,32 +1,22 @@
 /* Projects Section */
-.projects-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-
 .add-project-btn {
-  padding: 10px 20px;
-  background: #39bd00;
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  font-weight: 700;
+  padding: 8px 12px;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(57, 189, 0, 0.3);
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.1em;
 }
 
 .add-project-btn:hover {
-  background: #32a000;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(57, 189, 0, 0.4);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.05);
 }
 
 .projects-container {

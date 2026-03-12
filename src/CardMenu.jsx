@@ -9,6 +9,7 @@ import gsap from 'gsap';
 const navItems = [
   { to: '/contact',    label: 'Contact',    clr: '#7bfb99' },
   { to: '/myzone',     label: 'MyZone',     clr: '#f39c12' },
+  { to: '/draw',       label: 'Draw',       clr: '#00c6ff' },
   { to: '/gamezone',   label: 'GameZone',   clr: '#ff6b35' },
   { to: '/other',      label: 'Other',      clr: '#8e44ad' },
   { to: '/experience', label: 'Experience', clr: '#ff6b35' },

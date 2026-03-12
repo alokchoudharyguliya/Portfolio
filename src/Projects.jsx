@@ -56,14 +56,8 @@ const ProjectCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
     >
       <div className='card-header' style={{ background: '#39bd00', '--clr': '#39bd00' }}>
         <h2>Projects</h2>
-        <NavLink to="/" className={isNavBarClosed ? 'cross-button-closed' : 'cross-button-open'} onClick={() => setIsNavBarClosed(!isNavBarClosed)}>
-          <FaBars />
-        </NavLink>
-      </div>
-
-      <div className='card-body'>
-        <div className="projects-header">
-          <button 
+        <div className="header-actions">
+          <button
             className="add-project-btn"
             onClick={() => {
               const newProject = {
@@ -80,11 +74,17 @@ const ProjectCard = ({ isNavBarClosed, setIsNavBarClosed }) => {
               setProjects([...projects, newProject]);
               setEditProjectIndex(newProject.id);
             }}
+            title="Add new project"
           >
-            <FaPlus /> Add Project
+            <FaPlus size={18} />
           </button>
+          <NavLink to="/" className={isNavBarClosed ? 'cross-button-closed' : 'cross-button-open'} onClick={() => setIsNavBarClosed(!isNavBarClosed)}>
+            <FaBars />
+          </NavLink>
         </div>
+      </div>
 
+      <div className='card-body'>
         <div className="projects-container">
           {projects.map((project) => (
             <motion.div
