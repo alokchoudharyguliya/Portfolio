@@ -1,0 +1,24 @@
+.draw-placeholder {
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(0,198,255,0.12);
+  color: #000;
+}
+
+.draw-placeholder h3 {
+  color: #00c6ff;
+  margin: 0 0 0.5rem 0;
+}
+
+.draw-placeholder p {
+  margin: 0;
+  color: #111;
+}
+
+/* Reuse existing card layout rules from other components */
+.card .card-header[style] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
