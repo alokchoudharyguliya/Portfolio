@@ -65,12 +65,14 @@ h2 {
 
 .social-item {
   display: flex;
-  align-items: center;
+  align-items: center; /* allow multi-line content */
   padding: 1rem;
   border-radius: 8px;
   background-color: white;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
+  gap: 12px;
+  min-height: 72px;
 }
 
 .social-item:hover {
@@ -86,25 +88,33 @@ h2 {
 }
 
 .social-logo img {
-  width: 100%;
-  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 .social-details {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 0 1rem;
+  min-width: 0; /* allow truncation */
 }
 
 .social-details h3 {
   margin: 0 0 0.5rem 0;
   color: #444;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* title stays on one line */
 }
 
 .social-details a {
   color: #666;
   text-decoration: none;
   transition: color 0.2s ease;
+  /* allow long urls to wrap onto following lines rather than overlap actions */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .social-details a:hover {
@@ -119,12 +129,132 @@ h2 {
   flex-direction: row-reverse;
 }
 
+/* Action buttons for each social-item (edit/delete) */
+.social-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+  align-items: center;
+  flex-shrink: 0; /* keep actions from shrinking */
+}
+
+.social-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #ff4443;
+  color: #fff;
+}
+.social-actions button:hover { background: #d32f2f; }
+.social-actions .delete-btn { background: #e74c3c; }
+.social-actions .delete-btn:hover { background: #c0392b; }
+
+/* Header actions (add button) */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.add-social-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.1em;
+}
+.add-social-btn:hover { transform: scale(1.05); }
+
+/* Add / Edit social forms */
+.add-social-form, .edit-social-form {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.add-social-form form, .edit-social-form form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.add-social-form input, .edit-social-form input { padding: 8px 10px; border: 1px solid #eee; border-radius: 6px; font-size: 0.95em; }
+.add-social-form .form-actions, .edit-social-form .form-actions { display: flex; gap: 8px; margin-left: auto; }
+.add-social-form .save-btn, .edit-social-form .save-btn { background: #ff4443; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+.add-social-form .cancel-btn, .edit-social-form .cancel-btn { background: #eee; color: #333; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+
+/* Loading / Error / Empty states */
+.loading-text, .error-text, .empty-text { padding: 12px; text-align: center; font-size: 0.95em; }
+.loading-text { color: #666; }
+.error-text { color: #e74c3c; background: #fadbd8; border-radius: 8px; }
+
+/* WhatsApp QR block */
+.whatsapp-qr {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #eef6f0;
+  border-radius: 8px;
+}
+.whatsapp-qr h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #075e54; /* WhatsApp green */
+}
+.whatsapp-qr img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  background: #fff;
+}
+.whatsapp-qr .qr-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  word-break: break-all;
+}
+
+
 /* Contact Form Styles */
 .contact-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
+
+/* Mode toggle */
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mode-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.mode-btn.active {
+  background: #ff4443;
+  color: #fff;
+  border-color: #ff4443;
+}
+
+.form-group input, .form-group textarea { width: 100%; box-sizing: border-box; }
 
 .form-group {
   display: flex;
